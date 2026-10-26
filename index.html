@@ -758,8 +758,8 @@ function mergeSV(L,C){if(C===null||C===undefined)return L;if(L===null||L===undef
  if(typeof L==='object'&&typeof C==='object'){const o=Object.assign({},L);for(const k in C){if(['log','board','vol','q','top','outfit','pet','ini'].includes(k)){if(o[k]===undefined)o[k]=C[k];continue;}o[k]=mergeSV(L[k],C[k]);}return o;}return L;}
 let cloudT=0,cloudBusy=false,cloudReady=false;
 function cloudPush(){if(!online()||!uid()||!cloudReady||MOCK)return;const s=JSON.stringify(Object.assign({},SV,{log:(SV.log||[]).slice(-60)}));if(s.length>60000)return;NET().set('users/'+uid(),{save:s,t:Date.now()}).catch(()=>{});}
-async function cloudPull(){if(!online()||!uid()||MOCK||cloudBusy)return;cloudBusy=true;try{const d=await NET().get('users/'+uid());if(d&&d.save){const C=JSON.parse(d.save);SV=mergeSV(SV,C);migrate&&migrate();_svSave();toast='☁ Cloud save synced';toastT=120;}cloudReady=true;cloudPush();}catch(e){acctMsg='Cloud save unavailable';}cloudBusy=false;}
-const _svSave=save;save=function(){_svSave();clearTimeout(cloudT);cloudT=setTimeout(cloudPush,3000);};
+async function cloudPull(){if(!online()||!uid()||MOCK||cloudBusy)return;cloudBusy=true;try{const d=await NET().get('users/'+uid());if(d&&d.save){const C=JSON.parse(d.save);const prog=o=>(o.maxLevel||1)*1000+((o.stats||{}).del||0)*10+((o.stats||{}).ko||0)*.01;let useC;if(SV.uid===uid())useC=(C.savedAt||0)>(SV.savedAt||0);else useC=prog(C)>=prog(SV);if(useC){const keep={vol:SV.vol,q:SV.q,log:SV.log};SV=Object.assign({},C,keep);migrate&&migrate();toast='☁ Cloud save loaded';}else toast='☁ This device\'s save synced to cloud';toastT=120;}SV.uid=uid();_svSave();cloudReady=true;cloudPush();}catch(e){acctMsg='Cloud save unavailable';}cloudBusy=false;}
+const _svSave=save;save=function(){SV.savedAt=Date.now();SV.rev=(SV.rev||0)+1;_svSave();clearTimeout(cloudT);cloudT=setTimeout(cloudPush,3000);};
 addEventListener('fbuser',()=>{cloudReady=false;if(fb().user){if(fb().locked===false)cloudPull();}});
 addEventListener('fbstatus',()=>{if(fb().user&&fb().locked===false)cloudPull();});
 // ---- global leaderboard ----
@@ -835,7 +835,7 @@ const _dt2=drawTitle;drawTitle=function(){_dt2();btn(W/2+100,168,84,18,'CO-OP','
 const _dr2=draw;draw=function(){if(state==='account'||state==='coop'){X.setTransform(RS,0,0,RS,0,0);UI=[];state==='account'?drawAccount():drawCoop();drawToast();return;}_dr2();};
 const _up=update;update=function(){if(COOP&&!COOP.host&&state==='play'){frame++;guestUpdate();return;}_up();if(COOP&&COOP.host)hostTx();};
 const _rs2=reset;reset=function(){if(!COOP)P2=null;_rs2();};
-Object.defineProperties(window.PP,Object.getOwnPropertyDescriptors({hostRoom,joinRoom,coopStart,coopEnd,get COOP(){return COOP},get P2(){return P2},mergeSV,online,onlineMsg,set boardTab(v){boardTab=v},get GI(){return GI}}));
+Object.defineProperties(window.PP,Object.getOwnPropertyDescriptors({save,hostRoom,joinRoom,coopStart,coopEnd,get COOP(){return COOP},get P2(){return P2},mergeSV,online,onlineMsg,set boardTab(v){boardTab=v},get GI(){return GI}}));
 
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script><script type="module">

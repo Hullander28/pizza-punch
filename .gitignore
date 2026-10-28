@@ -1,3 +1,4 @@
 *.png
 !icon-*.png
 *.zip
+!sprites/*.png

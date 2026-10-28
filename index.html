@@ -47,11 +47,11 @@ function vib(p){if(typeof SV!=='undefined'&&SV&&SV.hap===false)return;try{naviga
 // ---------- save / shop data ----------
 const BAG=[{n:'No Bag',hp:100,st:8,so:3,sn:0,c:0},{n:'Small',hp:120,st:12,so:4,sn:1,c:40},{n:'Medium',hp:140,st:16,so:5,sn:2,c:90},{n:'Large',hp:170,st:24,so:7,sn:3,c:160}];
 const OUTFITS=[{id:'uniform',n:'Pizza Uniform',c:0,b:'#d22',a:'#fff',h:'#d22'},{id:'hoodie',n:'Comfy Hoodie',c:60,b:'#777',a:'#555',h:'hood'},{id:'track',n:'Tracksuit',c:120,b:'#2346c8',a:'#fff',h:'none'},{id:'chef',n:'Chef Whites',c:200,b:'#f4f4f4',a:'#c22',h:'toque'},{id:'ninja',n:'Night Ninja',c:300,b:'#222',a:'#d22',h:'band'},{id:'gold',n:'Gold Legend +25%$',c:700,b:'#e8b923',a:'#fff4a0',h:'crown'},{id:'disco',n:'Disco Fever (RARE)',c:0,rare:1},{id:'astro',n:'Astro Driver (RARE)',c:0,rare:1},{id:'nightshift',n:'Night Shift Jacket (PASS)',c:0,rare:1},{id:'knight',n:'Pizza Knight (PASS)',c:0,rare:1},{id:'champ',n:'Champion Jacket (CUP)',c:0,rare:1}];
-const UPG=[{k:'dmg',n:'Star Damage',c:[40,90]},{k:'dbl',n:'Double Shot',c:[80]},{k:'choc',n:'Choc-Chip Boom',c:[150]},{k:'splash',n:'Bigger Splash',c:[45,100]},{k:'sticky',n:'Sticky Soda Slow',c:[110]}];
+const UPG=[{k:'pow',n:'Power Punch (+12% hits)',c:[60,140]},{k:'hp',n:'Tough Crust (+12% HP)',c:[70,160]},{k:'dmg',n:'Star Damage',c:[40,90]},{k:'dbl',n:'Double Shot',c:[80]},{k:'choc',n:'Choc-Chip Boom',c:[150]},{k:'splash',n:'Bigger Splash',c:[45,100]},{k:'sticky',n:'Sticky Soda Slow',c:[110]}];
 const BIKE_COST=1200;
 const RIDES=[{n:'On Foot',spd:1.8},{n:'Rollerblades',c:150,spd:2.05,k:'SPIN',info:'glide + SPIN KICK hits both sides'},{n:'Skateboard',c:350,spd:2.25,k:'FLIP',info:'kickflip BOARD SMACK'},{n:'Scooter',c:700,spd:2.45,k:'WHEELIE',info:'WHEELIE CHARGE'},{n:'Turbo Bicycle',c:1200,spd:2.7,k:'DASH',info:'fastest + DASH RAM'}];
 function curRide(){return Math.min(SV.ride||0,SV.rides||0);}
-const DEF={bank:0,best:0,stars:4,soda:2,snacks:0,bag:0,up:{dmg:0,dbl:0,choc:0,splash:0,sticky:0},owned:['uniform'],outfit:'uniform',bike:0,ride:1,maxLevel:1,level:1,rating:{}};
+const DEF={bank:0,best:0,stars:4,soda:2,snacks:0,bag:0,up:{dmg:0,dbl:0,choc:0,splash:0,sticky:0,pow:0,hp:0},owned:['uniform'],outfit:'uniform',bike:0,ride:1,maxLevel:1,level:1,rating:{}};
 let SV;try{SV=JSON.parse(localStorage.getItem('pp_save'))}catch(e){}SV=Object.assign({},DEF,SV||{});SV.up=Object.assign({},DEF.up,SV.up||{});SV.rating=SV.rating||{};if(!Array.isArray(SV.owned))SV.owned=['uniform'];
 function migrate(){if(SV.tutDone===undefined&&(SV.maxLevel>1||SV.bank>0||SV.best>0))SV.tutDone=1;if(!SV.rideV2){SV.rides=SV.bike?4:0;SV.ride=SV.bike&&SV.ride?4:0;SV.rideV2=1;}}
 function save(){try{localStorage.setItem('pp_save',JSON.stringify(SV))}catch(e){}}
@@ -143,7 +143,7 @@ function meleeHit(range,dmg,kb,knock,label){dmg=Math.max(1,Math.round(dmg*DRV(P)
  if(hit){haptic(P.atkType==='k'?'kick':(knock||P.atkType==='u')?'finisher':'punch');thump(dmg>1?.55:.34,dmg);shake=Math.max(shake,Math.min(8,2+dmg*1.8+hit));hitstop=(knock||dmg>1)?5:2;beep(dmg>1?120:190,.1,'square',.1);flash=2;}else beep(300,.03,'sine',.03);return hit;}
 function playerHit(dmg,dir,t){if(P.inv>0||P.spin>0||P.dash>0)return;P.hp-=dmg;P.hits=(P.hits||0)+1;voice('oof',.9+rnd()*.2);P.hurt=16;P.inv=Math.round(45/Math.max(.55,(LV&&LV.ez)||1));P.vx=dir*4;shake=8;P.combo=0;puff(P.x,P.y-30,'#f44',7);txt(P.x,P.y-52,t,'#f66');beep(90,.15,'sawtooth');haptic('hurt');timeLeft-=1;if(P.hp/P.maxhp<.3&&rnd()<.4)quip(TONYQ.low);if(P.hp<=0){P.hp=0;haptic('down');endRun(false,'THEY ATE THE PIZZA!');}}
 function drop(e){if(!e.boss&&rnd()<.12)picks.push({x:e.x,y:e.y,z:10,vz:2,l:900,k:['cue','lid','peel'][Math.floor(rnd()*3)]});const n=e.boss?(e.type==='couch'?10:6):(rnd()<.85?1:0);for(let i=0;i<n;i++)picks.push({x:e.x+(rnd()-.5)*30,y:clamp(e.y+(rnd()-.5)*16,FLOOR0,FLOOR1),z:10,vz:2+rnd()*2,l:700,k:'coin'});
- const r=rnd();if(r<.22)picks.push({x:e.x+10,y:e.y,z:10,vz:2.5,l:800,k:'star'});else if(r<.30)picks.push({x:e.x+10,y:e.y,z:10,vz:2.5,l:800,k:'soda'});else if(r<(DM('hot')?.5:.37))picks.push({x:e.x-10,y:e.y,z:10,vz:2.5,l:800,k:'hotbag'});else if(r<.41+(1-((LV&&LV.ez)||1))*.4)picks.push({x:e.x-10,y:e.y,z:10,vz:2.5,l:800,k:'snack'});}
+ const r=rnd();if(r<.22)picks.push({x:e.x+10,y:e.y,z:10,vz:2.5,l:800,k:'star'});else if(r<.30)picks.push({x:e.x+10,y:e.y,z:10,vz:2.5,l:800,k:'soda'});else if(r<(DM('hot')?.5:.37))picks.push({x:e.x-10,y:e.y,z:10,vz:2.5,l:800,k:'hotbag'});else if(r<(lvl>1?.404:.41)+(1-((LV&&LV.ez)||1))*.4)picks.push({x:e.x-10,y:e.y,z:10,vz:2.5,l:800,k:'snack'});}
 function endRun(win,why){if(state!=='play')return;if(!RUSH&&!DAILY&&!TUT&&!COOP){SV.fails=SV.fails||{};if(win)delete SV.fails[lvl];else SV.fails[lvl]=(SV.fails[lvl]||0)+1;}state=win?'win':'over';msg=why||'';const gold=SV.outfit==='gold'?1.25:1;
  if(win){const tf=timeLeft/LV.time,hf=P.hp/P.maxhp;rating=1+(tf>.2&&hf>.25?1:0)+(tf>.45&&hf>.5?1:0);const cu=custOf();let tf2=cu.tf(rating,hf,P.maxCombo);P.copFail=false;if(cu.cop){if(en.some(e=>e.loiter&&!e.sleep)){tf2=0;P.copFail=true;}else tf2=2;}if(DM('glass'))tf2*=3;tip=Math.round((3+tf*12)*(1+(lvl-1)*.2)*tf2);score+=Math.round(timeLeft*50)+rating*500;if(DAILY){const d=SV.daily||{last:0,streak:0};const tk=todayKey();if(d.last!==tk){d.streak=d.last===yKey()?d.streak+1:1;d.last=tk;}P.streakBonus=10*d.streak;tip+=P.streakBonus;SV.daily=d;}else{SV.rating[lvl]=Math.max(SV.rating[lvl]||0,rating);SV.maxLevel=Math.max(SV.maxLevel,lvl+1);}beep(880,.3,'triangle');beep(1100,.4,'triangle',.04);}
  const earned=Math.round((coinN+tip)*gold);SV.bank+=earned;P.earned=earned;SV.stars=Math.min(P.stars,BAG[SV.bag].st);SV.soda=Math.min(P.soda,BAG[SV.bag].so);SV.snacks=P.snacks;SV.best=Math.max(SV.best,score);SV.stats=SV.stats||{ko:0,del:0};if(win){SV.stats.del++;if(!P.hits)unlock('nohit');}addXP(win?60+rating*30+coinN*2:20);checkAch();if(win)P.box=mysteryBox();if(qualifies(score))hsPending={s:score,l:DAILY?'DAILY '+DAILY.seed%10000:'LV '+lvl};save();if(!win){beep(110,.6,'sawtooth');vib(200);}}
@@ -1356,7 +1356,7 @@ const BL=['couch','van','dj','truck','chef','lamp','gary','insp','pepper','ceo']
 const NBK=['chef','lamp','gary','insp','pepper','ceo'];
 const BNAME={couch:'LORD LOUNGEWORTH',van:'SUNSHINE SALLY',dj:'DJ HAZE',truck:'MUNCHIE MONSTER',chef:'PAPA CALZONE',lamp:'LAVA LAMP LARRY',gary:'GNARLY GARY',insp:'INSPECTOR GRIMSBY',pepper:'EL GHOST PEPPER',ceo:'THE BIG CHEESE'};
 const NBDEF={
- chef:{hp:22,dmg:10,spd:.9,w:22,cd:100,col:'#e23b3b',sub:'RIVAL PIZZERIA OWNER — DODGE THE DOUGH, IT COMES BACK!',quote:'Your pizza? Is-a my pizza now!',talk:'MAMMA MIA, A DELIVERY BOY?',ach:'Dough Boy',q:'Back to the kitchen.'},
+ chef:{hp:22,dmg:10,spd:.95,w:22,cd:90,col:'#e23b3b',sub:'RIVAL PIZZERIA OWNER — DODGE THE DOUGH, IT COMES BACK!',quote:'Your pizza? Is-a my pizza now!',talk:'MAMMA MIA, A DELIVERY BOY?',ach:'Dough Boy',q:'Back to the kitchen.'},
  lamp:{hp:22,dmg:11,spd:.6,w:20,cd:100,col:'#3fcf5a',sub:'GROOVY GOO WIZARD — DON\'T STAND IN THE GOO!',quote:'Whoa... your aura is SO pepperoni.',talk:'FEEL THE GLOW, MAN...',ach:'Lights Out',q:'Lamp unplugged.'},
  gary:{hp:21,dmg:12,spd:3.2,w:22,cd:90,col:'#ffb020',sub:'SKATEPARK KING — WATCH HIS SHADOW, MOVE BEFORE HE LANDS!',quote:'Pizza? More like... SHRED-ZA!',talk:'GNARLY! A NEW RAMP!',ach:'Bail!',q:'Bail of the century.'},
  insp:{hp:21,dmg:12,spd:.8,w:18,cd:85,col:'#9aa6b8',sub:'HEALTH INSPECTOR — TICKETS FLY IN THREE LANES!',quote:'This pizza is in VIOLATION.',talk:'I\'LL NEED TO SEE YOUR PERMIT.',ach:'Code Violation',q:'Case closed.'},
@@ -1474,12 +1474,12 @@ const _mkL19=makeLevel;makeLevel=function(n){const L=_mkL19(n);const b=bossOf(n)
   const mx=w.final?3:Math.min(8,2+Math.floor(n*.55));let ns=w.list.filter(k=>k==="stoner").length;while(n>3&&ns>mx){w.list.splice(w.list.indexOf('stoner'),1);ns--;}if(!w.final&&n>3){const sx=Math.min(3,1+Math.floor((n-3)/3));let nk=w.list.filter(k=>k==='skate').length;while(nk>sx){w.list.splice(w.list.indexOf('skate'),1);nk--;}}}
  L.time=102+Math.min(n,20)*6;return L;};
 const _mkE19=mkEnemy;mkEnemy=function(t,side){
- if(!NBDEF[t]){const e=_mkE19(t,side);if(e&&e.boss&&LV){const fin=LV.waves&&LV.waves.some(w=>w.final&&w.list[0]===t&&w.done)&&!en.some(o=>o!==e&&o.boss===2);if(t==='van'&&(fin||(RUSH&&RUSH.boss))){e.boss=2;if(lvl<=3&&!RUSH){e.dmg=Math.max(7,e.dmg-3);e.cd+=30;}e.hp=Math.round(e.hp*1.5);e.maxhp=e.hp;e.talk='PEACE, LOVE... AND YOUR PIZZA!';e.talkT=150;}nbTier(e);}return e;}
+ if(!NBDEF[t]){const e=_mkE19(t,side);if(e&&e.boss&&LV){const fin=LV.waves&&LV.waves.some(w=>w.final&&w.list[0]===t&&w.done)&&!en.some(o=>o!==e&&o.boss===2);if(t==='van'&&(fin||(RUSH&&RUSH.boss))){e.boss=2;if(lvl<=3&&!RUSH){e.dmg=Math.max(7,e.dmg-4);e.cd+=30;}e.hp=Math.round(e.hp*1.5);e.maxhp=e.hp;e.talk='PEACE, LOVE... AND YOUR PIZZA!';e.talkT=150;}nbTier(e);}return e;}
  const D=NBDEF[t],df=LV.df||1;const e=_mkE19('stoner',side);e.persona=null;e.nameT=0;e.kind=null;
  Object.assign(e,{type:t,hp:Math.round(D.hp*df),spd:D.spd,w:D.w,dmg:D.dmg,boss:2,x:camX+W-60,y:FLOOR0+30,face:-1,cd:D.cd,st:'idle',stT:0,talk:D.talk,talkT:150,grab:0});
  const ez=(LV&&LV.ez)||1;e.dmg=Math.max(2,Math.round(e.dmg*ez));if(lvl<=5&&!RUSH)e.hp=Math.round(e.hp*.88);if(ez<1)e.cd+=40;
  e.maxhp=e.hp;nbTier(e);return e;};
-const HPT=[18,23,27,31,35,39,44,49,54,61];const bossHP=n=>n<=10?HPT[n-1]:61+(n-10)*8;
+const HPT=[18,23,27,31,35,39,44,49,54,61];const DF25=n=>RUSH?1.1:n<=1?1.05:Math.min(1.15,1.08+.01*n);const bossHP=n=>Math.round((n<=10?HPT[n-1]:61+(n-10)*8)*DF25(n));
 function nbTier(e){const t=RUSH?0:tierOf(lvl);e.tier=t;if(e.boss===2&&!RUSH&&!TUT&&!DAILY){e.hp=bossHP(lvl);e.maxhp=e.hp;}if(t>0){e.dmg=Math.round(e.dmg*(1+.1*t));e.spd*=1+.06*t;}e.agg=1+.12*t;}
 // clamp legacy cooldown formulas at high levels
 // ---- boss AI ----
@@ -1522,7 +1522,7 @@ function nbAI(e){const dx=P.x-e.x,dy=P.y-e.y,sm=e.slow>0?.4:1,ag=e.agg*(e.rage?1
 function nbUpd(){
  for(const q of NBP){q.l--;if(q.own&&q.own.sleep)q.l=0;
   if(q.k==='dough'){if(q.out){q.x+=q.vx;if(Math.abs(q.x-q.ox)>200||q.x<camX||q.x>camX+W){q.out=0;}}else{const o=q.own;if(!o||o.sleep){q.l=0;continue;}q.x+=Math.sign(o.x-q.x)*5;q.y+=Math.sign(o.y-q.y)*1;if(Math.abs(o.x-q.x)<10)q.l=0;}
-   if(!q.hitT&&Math.abs(q.x-P.x)<14&&Math.abs(q.y-P.y)<12&&P.z<30){playerHit(q.dmg,q.out?Math.sign(q.vx):-Math.sign(q.vx),'DOUGH!');q.hitT=999;}if(q.hitT>0)q.hitT--;}
+   if(!q.hitT&&Math.abs(q.x-P.x)<14&&Math.abs(q.y-P.y)<12&&P.z<30){playerHit(q.dmg,q.out?Math.sign(q.vx):-Math.sign(q.vx),'DOUGH!');q.hitT=q.out?50:999;}if(q.hitT>0)q.hitT--;}
   else if(q.k==='blob'){if(q.home){q.vx+=Math.sign(P.x-q.x)*.05;q.vy+=Math.sign(P.y-q.y)*.03;q.vx=clamp(q.vx,-1.8,1.8);q.vy=clamp(q.vy,-.8,.8);}q.x+=q.vx;q.y=clamp(q.y+q.vy,FLOOR0,FLOOR1);if(Math.abs(q.x-P.x)<10&&Math.abs(q.y-P.y)<9&&P.z<30){playerHit(q.dmg,q.vx>0?1:-1,'BLOOP!');q.l=0;puff(q.x,q.y-q.z,'#7f7',8);}}
   else if(q.k==='ticket'){q.x+=q.vx;q.y=clamp(q.y+q.vy,FLOOR0,FLOOR1);if(Math.abs(q.x-P.x)<10&&Math.abs(q.y-P.y)<9&&P.z<30){playerHit(q.dmg,q.vx>0?1:-1,'FINED!');q.l=0;}if(q.x<camX-20||q.x>camX+W+20)q.l=0;}
   else if(q.k==='wave'){q.r+=4;const d=Math.hypot(P.x-q.x,(P.y-q.y)*2.5);if(!q.hit&&Math.abs(d-q.r)<7&&P.z<6){q.hit=1;playerHit(q.dmg,P.x>q.x?1:-1,'SHOCKWAVE!');}}}
@@ -1580,7 +1580,12 @@ const _hu19=hurtE;hurtE=function(e,d,dir,kb,knock){const r=_hu19(e,d,dir,kb,knoc
 // achievements for the new bosses
 for(const k of NBK)ACH.push({id:k,n:NBDEF[k].ach,d:'Beat '+BNAME[k].replace(/^THE /,'The ').toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()),r:60+NBK.indexOf(k)*10});
 setTimeout(()=>NBK.forEach(k=>SPR.pre(k)),3000);
-const _rs19=reset;reset=function(){_rs19();NBP=[];NBG=[];};
+const _rs19=reset;reset=function(){_rs19();NBP=[];NBG=[];if(P&&!TUT){const u=(SV.up||{}).hp||0;if(u){P.maxhp=Math.round(P.maxhp*(1+.12*u));P.hp=P.maxhp;}}};
+// v25: one notch harder; upgrades offset it
+const _mk25=mkEnemy;mkEnemy=function(t,side){const e=_mk25(t,side);if(e&&!TUT){const k=DF25(lvl);e.dmg=Math.round(e.dmg*k);if(!e.boss)e.spd*=1+(k-1)*.5;else e.agg=(e.agg||1)*k;}return e;};
+let MELEE25=0;const _mh25=meleeHit;meleeHit=function(...a){MELEE25=1;try{return _mh25(...a);}finally{MELEE25=0;}};
+const _he25=hurtE;hurtE=function(e,d,...a){if(MELEE25&&SV.up&&SV.up.pow)d=d*(1+.12*SV.up.pow);return _he25(e,d,...a);};
+const _up25=update;update=function(){const was=state==='play';_up25();if(!was||state!=='play'||TUT)return;const k=DF25(lvl)-1;for(const e of en)if(e.boss&&!e.sleep&&!NBDEF[e.type]&&e.cd>0)e.cd-=k;};
 // boss rush: all 10
 startBossRush=function(){startRush();RUSH.boss=true;RUSH.bi=0;RUSH.t=60;RUSH.f0=frame;RUSH.list=BL.slice();say('BOSS RUSH! 10 BOSSES!',120);};
 // hidden toppings: 10 (one per level)

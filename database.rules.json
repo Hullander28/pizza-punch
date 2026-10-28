@@ -20,12 +20,12 @@
     },
     "lb": {
       "$board": {
-        ".read": "$board.matches(/^(story|rush|d[0-9]{1,8}|w[0-9]{1,6})$/)",
+        ".read": "$board.matches(/^(story|rush|brush|d[0-9]{1,8}|w[0-9]{1,6})$/)",
         ".indexOn": [
           "s"
         ],
         "$uid": {
-          ".write": "auth != null && auth.uid === $uid && $board.matches(/^(story|rush|d[0-9]{1,8}|w[0-9]{1,6})$/) && (!newData.exists() || !data.exists() || newData.child('s').val() > data.child('s').val())",
+          ".write": "auth != null && auth.uid === $uid && $board.matches(/^(story|rush|brush|d[0-9]{1,8}|w[0-9]{1,6})$/) && (!newData.exists() || !data.exists() || newData.child('s').val() > data.child('s').val())",
           ".validate": "newData.hasChildren(['n', 's', 'l', 't'])",
           "n": {
             ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_]{1,12}$/)"

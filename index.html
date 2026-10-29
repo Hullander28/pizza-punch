@@ -1586,6 +1586,10 @@ const _mk25=mkEnemy;mkEnemy=function(t,side){const e=_mk25(t,side);if(e&&!TUT){c
 let MELEE25=0;const _mh25=meleeHit;meleeHit=function(...a){MELEE25=1;try{return _mh25(...a);}finally{MELEE25=0;}};
 const _he25=hurtE;hurtE=function(e,d,...a){if(MELEE25&&SV.up&&SV.up.pow)d=d*(1+.12*SV.up.pow);return _he25(e,d,...a);};
 const _up25=update;update=function(){const was=state==='play';_up25();if(!was||state!=='play'||TUT)return;const k=DF25(lvl)-1;for(const e of en)if(e.boss&&!e.sleep&&!NBDEF[e.type]&&e.cd>0)e.cd-=k;};
+// v26: arcade body fade — KO'd bodies lie ~1.2s, blink ~0.8s, then are removed
+const KOLIE=72,KOBLINK=48,KOBOSS=180;
+const _up26=update;update=function(){_up26();if(state!=='play')return;let rm=0;for(const e of en){if(!(e.sleep&&e.hp<=0&&e.ko<=0))continue;e.dT=(e.dT||0)+1;if(e.dT>=(e.boss?KOBOSS:KOLIE)+KOBLINK){e.gone=1;rm=1;}}if(rm){en=en.filter(e=>!e.gone);if(typeof FOC!=='undefined'&&FOC&&FOC.gone)FOC=null;}};
+const _de26=drawEnemy;drawEnemy=function(e){const lie=e.boss?KOBOSS:KOLIE;if(e.dT>lie&&((e.dT-lie)>>2)%2)return;return _de26(e);};
 // boss rush: all 10
 startBossRush=function(){startRush();RUSH.boss=true;RUSH.bi=0;RUSH.t=60;RUSH.f0=frame;RUSH.list=BL.slice();say('BOSS RUSH! 10 BOSSES!',120);};
 // hidden toppings: 10 (one per level)
